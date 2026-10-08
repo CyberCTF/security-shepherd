@@ -1,0 +1,241 @@
+{
+  "generated_by_isoloom": "from isoloom.yml; don't edit: change the spec and run `isoloom generate` (`isoloom check` fails when this file is out of date)",
+  "resolved_version": 1,
+  "name": "security-shepherd",
+  "instance": null,
+  "inputs": [],
+  "networks": {
+    "lab": {
+      "cidr": "10.60.13.0/24",
+      "docker_cidr": "10.60.13.0/24",
+      "internet": false,
+      "gateway": null,
+      "gateway_address": "10.60.13.1",
+      "router": null,
+      "controller": "10.60.13.253"
+    }
+  },
+  "reach": [],
+  "machines": {
+    "db": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.13.20"
+      },
+      "docker_addresses": {
+        "lab": "10.60.13.20"
+      },
+      "services": [
+        {
+          "port": 3306,
+          "name": "mysql",
+          "http": false,
+          "publish": null
+        }
+      ],
+      "depends_on": [],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 512,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    },
+    "web": {
+      "access": false,
+      "supplied": false,
+      "shapes": [
+        "docker"
+      ],
+      "arch": "amd64",
+      "os": null,
+      "windows": false,
+      "addresses": {
+        "lab": "10.60.13.10"
+      },
+      "docker_addresses": {
+        "lab": "10.60.13.10"
+      },
+      "services": [
+        {
+          "port": 8080,
+          "name": "http",
+          "http": true,
+          "publish": 8080
+        },
+        {
+          "port": 8443,
+          "name": "https",
+          "http": false,
+          "publish": 8443
+        }
+      ],
+      "depends_on": [
+        "db"
+      ],
+      "inputs": [],
+      "volumes": {},
+      "resources": {
+        "cpus": 1,
+        "memory_mb": 1024,
+        "disk_gb": 20
+      },
+      "gateway_of": [],
+      "routes": [],
+      "default_gateway": null,
+      "offline": true
+    }
+  },
+  "start_order": [
+    "db",
+    "web"
+  ],
+  "clones": {},
+  "tools": {},
+  "groups": {},
+  "router": null,
+  "controller": {
+    "addresses": {
+      "lab": "10.60.13.253"
+    }
+  },
+  "published": [
+    {
+      "machine": "web",
+      "port": 8080,
+      "host_port": 8080
+    },
+    {
+      "machine": "web",
+      "port": 8443,
+      "host_port": 8443
+    }
+  ],
+  "targets": {
+    "possible": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "generated": [
+      "docker",
+      "hosted",
+      "docker-vm",
+      "cloud-docker",
+      "kubernetes"
+    ],
+    "refused": {},
+    "not_possible": {
+      "hybrid": "only when some machines are containers and others are VMs",
+      "vagrant": "needs `vm:` on db, web",
+      "proxmox": "needs `vm:` on db, web",
+      "cloud-vm": "needs `vm:` on db, web",
+      "external": "needs `external:` on db, web"
+    }
+  },
+  "checks": {
+    "default_position": "networks",
+    "positions": [
+      {
+        "position": "networks",
+        "machine": null,
+        "runner": "isoloom-check",
+        "checks": [
+          {
+            "name": "the HTTP port redirects to HTTPS",
+            "derived": false,
+            "kind": "http",
+            "target": "http://web:8080/",
+            "expect": "302",
+            "wait": 180
+          },
+          {
+            "name": "the login page answers over HTTPS",
+            "derived": false,
+            "kind": "http",
+            "target": "https://web:8443/login.jsp",
+            "expect": "200",
+            "wait": 120
+          },
+          {
+            "name": "the admin logs in with the default password",
+            "derived": false,
+            "kind": "script",
+            "target": "checks/login.sh",
+            "expect": "",
+            "wait": 0
+          }
+        ]
+      },
+      {
+        "position": "db",
+        "machine": "db",
+        "runner": "isoloom-check-db",
+        "checks": [
+          {
+            "name": "web:8080 from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://10.60.13.10:8080/",
+            "expect": "any",
+            "wait": 30
+          },
+          {
+            "name": "web:8443 from db",
+            "derived": true,
+            "kind": "tcp",
+            "target": "10.60.13.10:8443",
+            "expect": "open",
+            "wait": 30
+          },
+          {
+            "name": "no internet from db",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      },
+      {
+        "position": "web",
+        "machine": "web",
+        "runner": "isoloom-check-web",
+        "checks": [
+          {
+            "name": "db:3306 from web",
+            "derived": true,
+            "kind": "tcp",
+            "target": "10.60.13.20:3306",
+            "expect": "open",
+            "wait": 30
+          },
+          {
+            "name": "no internet from web",
+            "derived": true,
+            "kind": "http",
+            "target": "http://1.1.1.1/",
+            "expect": "blocked",
+            "wait": 0
+          }
+        ]
+      }
+    ]
+  },
+  "message": "Security Shepherd answers at https://localhost:8443/ (a\nself-signed certificate). Log in as admin / password, set a new password, then open a class or\nthe open floor plan and start with the first lesson.\n"
+}

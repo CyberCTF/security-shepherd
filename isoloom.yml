@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://www.isoloom.com/schema/v1.json
+# OWASP Security Shepherd (by Mark Denihan and the OWASP Security Shepherd contributors) as an
+# Isoloom spec: the upstream source, vendored unchanged in build/web/app/, built with its Maven
+# docker profile and then its Dockerfile in one multi-stage build, plus its MySQL server seeded
+# with the core and module schemas.
+# `isoloom generate`, then `isoloom up docker`.
+version: 1
+name: security-shepherd
+
+networks:
+  lab: { cidr: 10.60.13.0/24, internet: false }
+
+machines:
+  db:
+    networks: { lab: 20 }
+    services: [{ port: 3306, name: mysql }]
+    resources: { cpus: 1, memory_mb: 512 }
+    docker:
+      build: build/db
+
+  web:
+    networks: { lab: 10 }
+    services:
+      - { port: 8080, name: http, http: true, publish: 8080 }
+      - { port: 8443, name: https, publish: 8443 }
+    depends_on: [db]
+    resources: { cpus: 1, memory_mb: 1024 }
+    docker:
+      build: build/web
+
+checks:
+  - name: the HTTP port redirects to HTTPS
+    http: http://web:8080/
+    expect: 302
+    wait: 180
+  - name: the login page answers over HTTPS
+    http: https://web:8443/login.jsp
+    wait: 120
+  - name: the admin logs in with the default password
+    script: checks/login.sh
+
+message: |
+  Security Shepherd answers at https://localhost:{{ machines.web.services.1.publish }}/ (a
+  self-signed certificate). Log in as admin / password, set a new password, then open a class or
+  the open floor plan and start with the first lesson.
