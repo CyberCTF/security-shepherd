@@ -16,7 +16,7 @@ Dockerfile in one multi-stage build.
 
 ```bash
 isoloom generate
-isoloom up docker
+isoloom run docker
 ```
 
 Then open https://localhost:8443/ (self-signed certificate) and log in as `admin` / `password`;
