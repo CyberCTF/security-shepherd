@@ -4,6 +4,5 @@
   "question": "Complete the lessons and challenges and submit each result key.",
   "category": "WEB",
   "difficulty": 3,
-  "evidence_kind": "SECRET",
-  "capabilities": ["sql-injection", "cross-site-scripting", "session-management", "insecure-direct-object-reference", "cross-site-request-forgery", "weak-cryptography"]
+  "evidence_kind": "SECRET"
 }
