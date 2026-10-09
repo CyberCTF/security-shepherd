@@ -9,6 +9,9 @@ services:
   db:
     build:
       context: ../../build/db
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: security-shepherd
     image: isoloom/security-shepherd-db
     platform: linux/amd64
     hostname: db
@@ -38,6 +41,8 @@ services:
           memory: 512M
     labels:
       isoloom.service.mysql: tcp:3306
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
     restart: unless-stopped
   db-routes:
     image: alpine:3.20
@@ -59,9 +64,15 @@ services:
       db:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
   web:
     build:
       context: ../../build/web
+      labels:
+        isoloom.managed: 'true'
+        isoloom.environment: security-shepherd
     image: isoloom/security-shepherd-web
     platform: linux/amd64
     hostname: web
@@ -99,6 +110,8 @@ services:
     labels:
       isoloom.service.http: http:8080
       isoloom.service.https: tcp:8443
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
     restart: unless-stopped
   web-routes:
     image: alpine:3.20
@@ -120,6 +133,9 @@ services:
       web:
         condition: service_started
     restart: unless-stopped
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
   isoloom-check:
     image: curlimages/curl:8.11.1
     profiles:
@@ -145,6 +161,9 @@ services:
         condition: service_healthy
       web-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
   isoloom-check-db:
     image: curlimages/curl:8.11.1
     profiles:
@@ -164,6 +183,9 @@ services:
         condition: service_healthy
       web-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
   isoloom-check-web:
     image: curlimages/curl:8.11.1
     profiles:
@@ -183,6 +205,9 @@ services:
         condition: service_healthy
       web-routes:
         condition: service_healthy
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
   isoloom-probe-amd64:
     image: busybox:1.37.0-musl
     platform: linux/amd64
@@ -194,11 +219,20 @@ services:
     - isoloom-probe-amd64:/probe
     network_mode: none
     restart: no
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
 networks:
   lab:
     ipam:
       config:
       - subnet: 10.60.13.0/24
         gateway: 10.60.13.1
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
 volumes:
-  isoloom-probe-amd64: {}
+  isoloom-probe-amd64:
+    labels:
+      isoloom.managed: 'true'
+      isoloom.environment: security-shepherd
