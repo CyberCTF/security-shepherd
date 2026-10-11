@@ -24,6 +24,13 @@ Shepherd asks for a new password at first login. The same spec runs as Docker on
 (`docker-vm`), on a cloud VM (`cloud-docker`) or on Kubernetes. Lab guide:
 [Security Shepherd wiki](https://github.com/OWASP/SecurityShepherd/wiki).
 
+## Flag
+
+The lab's objective is a flag in the table `flags` of the SQL Injection lesson's schema
+(`SqlInjLesson`), written at every start from the player's `CTF_FLAG_MAIN` (development value
+without one). Shepherd's own result keys stay in the app: they are derived from a key generated
+at each start and the player's user name, so CyberCTF does not check them.
+
 Upstream version and commit: [UPSTREAM.md](UPSTREAM.md).
 
 ## Licence

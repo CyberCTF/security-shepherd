@@ -1,7 +1,7 @@
 {
   "title": "OWASP Security Shepherd",
   "description": "A web and mobile security training platform from OWASP with lessons and progressively harder challenge levels, each returning a result key: injection, cross-site scripting, broken authentication and session management, insecure direct object references, CSRF and cryptographic flaws.",
-  "question": "Complete the lessons and challenges and submit each result key.",
+  "question": "Read the flag from the flags table of the SQL Injection lesson's schema. The in-app lessons and challenges still return their own result keys.",
   "category": "WEB",
   "difficulty": 3,
   "evidence_kind": "SECRET"

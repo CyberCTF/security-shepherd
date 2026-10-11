@@ -1,0 +1,63 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Read the flag",
+      "prompt": "Use the SQL Injection lesson to read the flag from the table flags of the lesson's database schema.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-security-shepherd}",
+      "hints": [
+        "The SQL Injection lesson builds its user lookup query by concatenating your input into a string.",
+        "The flag is not in the users table the lesson queries but in another table of the same schema, named flags: think about how to combine the results of two queries."
+      ],
+      "steps": [
+        {
+          "key": "parameter",
+          "title": "Find the input",
+          "prompt": "Which request parameter of the SQL Injection lesson ends up in the query? (parameter name)",
+          "check": {
+            "answer": [
+              "ausername"
+            ]
+          }
+        },
+        {
+          "key": "class",
+          "title": "Name the weakness",
+          "prompt": "Which vulnerability class does the lesson teach?",
+          "check": {
+            "answer": [
+              "sql injection",
+              "sqli"
+            ]
+          }
+        },
+        {
+          "key": "engine",
+          "title": "Identify the database",
+          "prompt": "Which database engine stores the lesson's data?",
+          "check": {
+            "answer": [
+              "mysql"
+            ]
+          }
+        },
+        {
+          "key": "technique",
+          "title": "Reach another table",
+          "prompt": "Which SQL operator appends the rows of a second query to the lesson's results? (keyword)",
+          "check": {
+            "answer": [
+              "union",
+              "union select",
+              "union all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
