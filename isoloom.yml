@@ -39,6 +39,7 @@ machines:
         publish: true
       https:
         port: 8443
+        protocol: https
         publish: true
     app:
       build: build/web
