@@ -8,31 +8,40 @@ version: 1
 name: security-shepherd
 
 # Given by the CyberCTF launcher: this player's flag. Without it the development flag.
-inputs: [CTF_FLAG_MAIN]
+inputs:
+  CTF_FLAG_MAIN: {}
 
 networks:
-  lab: { cidr: 10.60.13.0/24, internet: false }
+  lab: {cidr: 10.60.13.0/24, internet: false}
 
 machines:
   db:
-    networks: { lab: 20 }
-    services: [{ port: 3306, name: mysql }]
-    resources: { cpus: 1, memory_mb: 512 }
-    inputs: [CTF_FLAG_MAIN]
-    docker:
+    networks: {lab: 20}
+    resources: {cpus: 1, memory_mb: 512}
+    ports:
+      mysql:
+        port: 3306
+    files:
+      - path: /run/lab/ctf_flag_main
+        input: CTF_FLAG_MAIN
+    setup:
+      - ctf/flag.sh
+    app:
       build: build/db
-      init: [ctf/flag.sh]   # the flag, a row of SqlInjLesson.flags, written at every start
-
   web:
-    networks: { lab: 10 }
-    services:
-      - { port: 8080, name: http, http: true, publish: 8080 }
-      - { port: 8443, name: https, publish: 8443 }
+    networks: {lab: 10}
     depends_on: [db]
-    resources: { cpus: 1, memory_mb: 1024 }
-    docker:
+    resources: {cpus: 1, memory_mb: 1024}
+    ports:
+      http:
+        port: 8080
+        protocol: http
+        publish: true
+      https:
+        port: 8443
+        publish: true
+    app:
       build: build/web
-
 checks:
   - name: the HTTP port redirects to HTTPS
     http: http://web:8080/
@@ -45,6 +54,6 @@ checks:
     script: checks/login.sh
 
 message: |
-  Security Shepherd answers at https://localhost:{{ machines.web.services.1.publish }}/ (a
+  Security Shepherd answers at {{ machines.web.ports.https.url }} (a
   self-signed certificate). Log in as admin / password, set a new password, then open a class or
   the open floor plan and start with the first lesson.
